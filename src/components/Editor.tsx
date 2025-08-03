@@ -183,6 +183,9 @@ export const Editor = () => {
             className="min-h-[300px] bg-background/50 border-border focus:border-primary transition-smooth"
           />
 
+          {/* Панель специальных символов */}
+          <SpecialCharsManager text={text} onTextChange={handleTextChange} />
+
           {/* Статистика */}
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline" className="bg-background/50">
@@ -273,7 +276,6 @@ export const Editor = () => {
                 <Hash className="w-3 h-3 mr-1" />
                 Удалить все
               </Button>
-              <SpecialCharsManager text={text} onTextChange={handleTextChange} />
               <Button variant="outline" size="sm" onClick={cleanSpaces}>
                 <Space className="w-3 h-3 mr-1" />
                 Пробелы
