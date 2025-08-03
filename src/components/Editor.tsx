@@ -18,6 +18,7 @@ import {
   FileText
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SpecialCharsManager } from "./SpecialCharsManager";
 
 export const Editor = () => {
   const [text, setText] = useState("");
@@ -270,8 +271,9 @@ export const Editor = () => {
             <div className="grid grid-cols-2 gap-2">
               <Button variant="outline" size="sm" onClick={removeSpecialChars}>
                 <Hash className="w-3 h-3 mr-1" />
-                Спецсимволы
+                Удалить все
               </Button>
+              <SpecialCharsManager text={text} onTextChange={handleTextChange} />
               <Button variant="outline" size="sm" onClick={cleanSpaces}>
                 <Space className="w-3 h-3 mr-1" />
                 Пробелы
