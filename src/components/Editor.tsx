@@ -15,7 +15,8 @@ import {
   Hash,
   Smile,
   Space,
-  FileText
+  FileText,
+  Clipboard
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SpecialCharsManager } from "./SpecialCharsManager";
@@ -60,6 +61,16 @@ export const Editor = () => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(text);
     toast({ title: "Скопировано", description: "Текст скопирован в буфер обмена" });
+  };
+
+  const pasteFromClipboard = async () => {
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      handleTextChange(text + clipboardText);
+      toast({ title: "Вставлено", description: "Текст вставлен из буфера обмена" });
+    } catch (err) {
+      toast({ title: "Ошибка", description: "Не удалось прочитать буфер обмена" });
+    }
   };
 
   const clearText = () => {
@@ -146,31 +157,47 @@ export const Editor = () => {
           <div className="flex flex-wrap gap-2">
             <Button 
               variant="outline" 
-              size="sm" 
+              size="icon" 
               onClick={handleUndo}
               disabled={historyIndex <= 0}
               className="transition-smooth"
+              title="Отменить"
             >
-              <Undo className="w-4 h-4 mr-1" />
-              Отменить
+              <Undo className="w-4 h-4" />
             </Button>
             <Button 
               variant="outline" 
-              size="sm" 
+              size="icon" 
               onClick={handleRedo}
               disabled={historyIndex >= history.length - 1}
               className="transition-smooth"
+              title="Повтор"
             >
-              <Redo className="w-4 h-4 mr-1" />
-              Повтор
+              <Redo className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={copyToClipboard}>
-              <Copy className="w-4 h-4 mr-1" />
-              Копировать
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={copyToClipboard}
+              title="Копировать"
+            >
+              <Copy className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={clearText}>
-              <Trash2 className="w-4 h-4 mr-1" />
-              Очистить
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={pasteFromClipboard}
+              title="Вставить"
+            >
+              <Clipboard className="w-4 h-4" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={clearText}
+              title="Очистить"
+            >
+              <Trash2 className="w-4 h-4" />
             </Button>
           </div>
 
