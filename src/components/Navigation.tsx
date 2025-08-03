@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
   FileEdit, 
-  Mic, 
   History, 
   StickyNote, 
   Music, 
@@ -13,7 +12,6 @@ import {
 
 const navItems = [
   { id: 'editor', label: 'Editor', icon: FileEdit },
-  { id: 'speech', label: 'Speech', icon: Mic },
   { id: 'history', label: 'History', icon: History },
   { id: 'notes', label: 'Notes', icon: StickyNote },
   { id: 'suno', label: 'SunoEditor', icon: Music },

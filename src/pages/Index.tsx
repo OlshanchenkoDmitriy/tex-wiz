@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Editor } from "@/components/Editor";
-import { Speech } from "@/components/Speech";
 import { History } from "@/components/History";
 import { Notes } from "@/components/Notes";
 import { SunoEditor } from "@/components/SunoEditor";
@@ -13,8 +12,6 @@ const Index = () => {
     switch (activeTab) {
       case "editor":
         return <Editor />;
-      case "speech":
-        return <Speech />;
       case "history":
         return <History />;
       case "notes":
