@@ -1,10 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   StickyNote,
   Plus,
   Search,
@@ -15,46 +15,16 @@ import {
   Copy,
   Undo,
   Redo,
-  Type
+  Type,
+  Download,
+  Upload,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Мок данные для заметок
-const mockNotes: Note[] = [
-  {
-    id: "1",
-    title: "Идеи для проекта",
-    content: "1. Добавить поддержку offline режима\n2. Интеграция с облачными сервисами\n3. Улучшить UI/UX дизайн\n4. Добавить экспорт в различные форматы",
-    createdAt: new Date("2024-01-15T10:00:00"),
-    updatedAt: new Date("2024-01-15T11:30:00")
-  },
-  {
-    id: "2", 
-    title: "Рабочие задачи",
-    content: "Сегодня нужно:\n- Закончить модуль Speech\n- Протестировать History\n- Обновить документацию\n- Подготовить презентацию",
-    createdAt: new Date("2024-01-14T09:00:00"),
-    updatedAt: new Date("2024-01-14T15:45:00")
-  },
-  {
-    id: "3",
-    title: "Покупки",
-    content: "Список покупок на выходные:\n- Продукты для завтрака\n- Канцелярские товары\n- Книги по программированию",
-    createdAt: new Date("2024-01-13T18:30:00"),
-    updatedAt: new Date("2024-01-13T18:30:00")
-  }
-];
+import { notesAPI, type Note } from "@/lib/storage";
 
 export const Notes = () => {
-  const [notes, setNotes] = useState<Note[]>(mockNotes);
-  const [selectedNote, setSelectedNote] = useState<Note | null>(notes[0]);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
@@ -65,19 +35,29 @@ export const Notes = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
 
-  const filteredNotes = notes.filter(note => 
-    note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    note.content.toLowerCase().includes(searchTerm.toLowerCase())
+  // Загружаем заметки при монтировании компонента
+  useEffect(() => {
+    const loadNotes = () => {
+      const allNotes = notesAPI.getAll();
+      setNotes(allNotes);
+      if (allNotes.length > 0 && !selectedNote) {
+        setSelectedNote(allNotes[0]);
+      }
+    };
+    loadNotes();
+  }, [selectedNote]);
+
+  const filteredNotes = notes.filter(
+    (note) =>
+      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      note.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const createNewNote = () => {
-    const newNote: Note = {
-      id: Date.now().toString(),
+    const newNote = notesAPI.create({
       title: "Новая заметка",
       content: "",
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+    });
     setNotes([newNote, ...notes]);
     setSelectedNote(newNote);
     setIsEditing(true);
@@ -97,29 +77,31 @@ export const Notes = () => {
 
   const saveNote = () => {
     if (!selectedNote) return;
-    
-    const updatedNote = {
-      ...selectedNote,
+
+    const updatedNote = notesAPI.update(selectedNote.id, {
       title: editTitle || "Без названия",
       content: editContent,
-      updatedAt: new Date()
-    };
-    
-    setNotes(notes.map(note => 
-      note.id === selectedNote.id ? updatedNote : note
-    ));
-    setSelectedNote(updatedNote);
-    setIsEditing(false);
-    toast({ title: "Сохранено", description: "Заметка обновлена" });
+    });
+
+    if (updatedNote) {
+      setNotes(
+        notes.map((note) => (note.id === selectedNote.id ? updatedNote : note))
+      );
+      setSelectedNote(updatedNote);
+      setIsEditing(false);
+      toast({ title: "Сохранено", description: "Заметка обновлена" });
+    }
   };
 
   const deleteNote = (noteId: string) => {
-    setNotes(notes.filter(note => note.id !== noteId));
-    if (selectedNote?.id === noteId) {
-      setSelectedNote(notes.find(note => note.id !== noteId) || null);
-      setIsEditing(false);
+    if (notesAPI.delete(noteId)) {
+      setNotes(notes.filter((note) => note.id !== noteId));
+      if (selectedNote?.id === noteId) {
+        setSelectedNote(notes.find((note) => note.id !== noteId) || null);
+        setIsEditing(false);
+      }
+      toast({ title: "Удалено", description: "Заметка удалена" });
     }
-    toast({ title: "Удалено", description: "Заметка удалена" });
   };
 
   const addToHistory = (content: string) => {
@@ -153,7 +135,10 @@ export const Notes = () => {
   const copyToClipboard = () => {
     if (!selectedNote) return;
     navigator.clipboard.writeText(selectedNote.content);
-    toast({ title: "Скопировано", description: "Содержимое заметки скопировано" });
+    toast({
+      title: "Скопировано",
+      description: "Содержимое заметки скопировано",
+    });
   };
 
   const clearContent = () => {
@@ -163,16 +148,67 @@ export const Notes = () => {
 
   const startVoiceInput = () => {
     // В реальном приложении здесь будет интеграция с модулем Speech
-    toast({ title: "Голосовой ввод", description: "Функция будет доступна после интеграции с модулем Speech" });
+    toast({
+      title: "Голосовой ввод",
+      description: "Функция будет доступна после интеграции с модулем Speech",
+    });
+  };
+
+  const exportNotes = () => {
+    const dataStr = JSON.stringify(notes, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `linguascribe-notes-${
+      new Date().toISOString().split("T")[0]
+    }.json`;
+    link.click();
+
+    URL.revokeObjectURL(url);
+    toast({ title: "Экспорт", description: "Заметки экспортированы" });
+  };
+
+  const importNotes = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedNotes = JSON.parse(e.target?.result as string);
+        if (Array.isArray(importedNotes)) {
+          // Добавляем импортированные заметки
+          importedNotes.forEach((note) => {
+            notesAPI.create({
+              title: note.title || "Импортированная заметка",
+              content: note.content || "",
+            });
+          });
+
+          // Перезагружаем заметки
+          const allNotes = notesAPI.getAll();
+          setNotes(allNotes);
+          toast({
+            title: "Импорт",
+            description: `${importedNotes.length} заметок импортировано`,
+          });
+        }
+      } catch (error) {
+        toast({ title: "Ошибка", description: "Неверный формат файла" });
+      }
+    };
+    reader.readAsText(file);
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
@@ -187,9 +223,33 @@ export const Notes = () => {
                 <StickyNote className="w-5 h-5 text-primary" />
                 <span>Заметки</span>
               </div>
-              <Button size="sm" onClick={createNewNote}>
-                <Plus className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center space-x-1">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={exportNotes}
+                  title="Экспорт"
+                >
+                  <Download className="w-4 h-4" />
+                </Button>
+                <label htmlFor="import-notes" className="cursor-pointer">
+                  <Button size="sm" variant="outline" asChild title="Импорт">
+                    <span>
+                      <Upload className="w-4 h-4" />
+                    </span>
+                  </Button>
+                </label>
+                <input
+                  id="import-notes"
+                  type="file"
+                  accept=".json"
+                  onChange={importNotes}
+                  className="hidden"
+                />
+                <Button size="sm" onClick={createNewNote}>
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -207,10 +267,12 @@ export const Notes = () => {
 
         <div className="space-y-2 max-h-[calc(100vh-16rem)] overflow-y-auto">
           {filteredNotes.map((note) => (
-            <Card 
+            <Card
               key={note.id}
               className={`cursor-pointer transition-smooth border-border ${
-                selectedNote?.id === note.id ? 'bg-primary/10 border-primary' : 'bg-card hover:bg-secondary/50'
+                selectedNote?.id === note.id
+                  ? "bg-primary/10 border-primary"
+                  : "bg-card hover:bg-secondary/50"
               }`}
               onClick={() => {
                 setSelectedNote(note);
@@ -261,14 +323,20 @@ export const Notes = () => {
                       placeholder="Название заметки"
                     />
                   ) : (
-                    <h2 className="text-lg font-medium">{selectedNote.title}</h2>
+                    <h2 className="text-lg font-medium">
+                      {selectedNote.title}
+                    </h2>
                   )}
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   {isEditing ? (
                     <>
-                      <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditing(false)}
+                      >
                         Отмена
                       </Button>
                       <Button size="sm" onClick={saveNote}>
@@ -284,21 +352,31 @@ export const Notes = () => {
                   )}
                 </div>
               </div>
-              
+
               {!isEditing && (
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                   <span>Обновлено: {formatDate(selectedNote.updatedAt)}</span>
                 </div>
               )}
             </CardHeader>
-            
+
             <CardContent className="space-y-4 h-full">
               {isEditing && (
                 <div className="flex flex-wrap gap-2 pb-2 border-b border-border">
-                  <Button variant="outline" size="sm" onClick={undo} disabled={historyIndex <= 0}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={undo}
+                    disabled={historyIndex <= 0}
+                  >
                     <Undo className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={redo} disabled={historyIndex >= history.length - 1}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={redo}
+                    disabled={historyIndex >= history.length - 1}
+                  >
                     <Redo className="w-4 h-4" />
                   </Button>
                   <Button variant="outline" size="sm" onClick={copyToClipboard}>
@@ -310,11 +388,11 @@ export const Notes = () => {
                   <Button variant="outline" size="sm" onClick={startVoiceInput}>
                     <Mic className="w-4 h-4" />
                   </Button>
-                  
+
                   <div className="flex items-center space-x-2 ml-auto">
                     <Type className="w-4 h-4" />
-                    <select 
-                      value={fontSize} 
+                    <select
+                      value={fontSize}
                       onChange={(e) => setFontSize(Number(e.target.value))}
                       className="text-sm bg-background border border-border rounded px-2 py-1"
                     >
@@ -327,7 +405,7 @@ export const Notes = () => {
                   </div>
                 </div>
               )}
-              
+
               {isEditing ? (
                 <Textarea
                   ref={textareaRef}
@@ -338,12 +416,14 @@ export const Notes = () => {
                   style={{ fontSize: `${fontSize}px` }}
                 />
               ) : (
-                <div 
+                <div
                   className="min-h-[400px] p-4 bg-background/30 rounded-md border border-border whitespace-pre-wrap"
                   style={{ fontSize: `${fontSize}px` }}
                 >
                   {selectedNote.content || (
-                    <span className="text-muted-foreground italic">Заметка пуста</span>
+                    <span className="text-muted-foreground italic">
+                      Заметка пуста
+                    </span>
                   )}
                 </div>
               )}

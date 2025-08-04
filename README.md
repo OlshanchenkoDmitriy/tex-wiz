@@ -1,73 +1,150 @@
-# Welcome to your Lovable project
+# LinguaScribe - Персональное приложение для работы с текстом
 
-## Project info
+## 🎯 Описание
 
-**URL**: https://lovable.dev/projects/44514a22-534f-44f7-9226-97119e4ea5d1
+**LinguaScribe** - это персональное приложение для работы с текстом, оптимизированное для использования на смартфоне. Все данные хранятся локально на вашем устройстве, приложение работает полностью офлайн.
 
-## How can I edit this code?
+## ✨ Основные возможности
 
-There are several ways of editing your application.
+### 📝 Текстовый редактор
 
-**Use Lovable**
+- Полнофункциональное редактирование с историей изменений
+- Инструменты форматирования (регистр, очистка)
+- Поиск и замена текста
+- Статистика (символы, слова, строки)
+- Сохранение в историю
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/44514a22-534f-44f7-9226-97119e4ea5d1) and start prompting.
+### 📚 Система заметок
 
-Changes made via Lovable will be committed automatically to this repo.
+- Создание, редактирование и удаление заметок
+- Поиск по содержимому
+- Экспорт и импорт заметок
+- Автосохранение
 
-**Use your preferred IDE**
+### 📖 История
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Отслеживание всех изменений текста
+- Фильтрация по языку и типу
+- Экспорт истории
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 🎵 Suno Editor
 
-Follow these steps:
+- Специализированный редактор для создания песен
+- Теги для структуры и стилей
+- Валидация структуры
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### ⚙️ Настройки
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- Настройка размера шрифта
+- Выбор темы оформления
+- Экспорт/импорт всех данных
+- Управление автосохранением
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🚀 Установка и запуск
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Требования
+
+- Node.js 18+
+- npm или yarn
+
+### Установка
+
+```bash
+# Клонирование репозитория
+git clone <YOUR_REPO_URL>
+cd tex-wiz
+
+# Установка зависимостей
+npm install
+
+# Запуск в режиме разработки
 npm run dev
+
+# Сборка для продакшена
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+## 📱 Мобильная оптимизация
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Приложение оптимизировано для использования на смартфонах:
 
-**Use GitHub Codespaces**
+- Адаптивный дизайн
+- Увеличенные размеры кнопок для сенсорного управления
+- Оптимизированные отступы и размеры шрифтов
+- Поддержка ориентации экрана
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 💾 Локальное хранение данных
 
-## What technologies are used for this project?
+Все данные хранятся в localStorage браузера:
 
-This project is built with:
+- Заметки
+- История изменений
+- Настройки приложения
+- Песни Suno
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Экспорт данных
 
-## How can I deploy this project?
+- Экспорт всех данных в JSON файл
+- Резервное копирование заметок
+- Перенос данных между устройствами
 
-Simply open [Lovable](https://lovable.dev/projects/44514a22-534f-44f7-9226-97119e4ea5d1) and click on Share -> Publish.
+### Импорт данных
 
-## Can I connect a custom domain to my Lovable project?
+- Импорт из JSON файлов
+- Восстановление из резервных копий
+- Синхронизация между устройствами
 
-Yes, you can!
+## 🛠 Технологии
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- **Frontend**: React 18 + TypeScript
+- **Сборка**: Vite
+- **Стили**: Tailwind CSS + shadcn/ui
+- **Хранение**: localStorage
+- **Мобильная разработка**: Capacitor
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 📋 Структура проекта
+
+```
+src/
+├── components/          # React компоненты
+│   ├── Editor.tsx      # Текстовый редактор
+│   ├── Notes.tsx       # Система заметок
+│   ├── History.tsx     # История изменений
+│   ├── SunoEditor.tsx  # Редактор песен
+│   ├── Settings.tsx    # Настройки
+│   └── ui/             # UI компоненты
+├── lib/
+│   ├── storage.ts      # API для локального хранения
+│   └── utils.ts        # Утилиты
+├── hooks/
+│   └── use-mobile-optimization.ts # Мобильная оптимизация
+└── pages/
+    └── Index.tsx       # Главная страница
+```
+
+## 🔧 Настройка для личного использования
+
+1. **Удалите ненужные зависимости** (уже сделано)
+2. **Настройте Capacitor для мобильной сборки**:
+
+   ```bash
+   npm install @capacitor/cli @capacitor/core
+   npx cap init
+   npx cap add android
+   npx cap sync
+   ```
+
+3. **Соберите для Android**:
+   ```bash
+   npm run build
+   npx cap copy android
+   npx cap open android
+   ```
+
+## 📝 Лицензия
+
+Этот проект предназначен для личного использования.
+
+## 🤝 Поддержка
+
+Для вопросов и предложений создавайте issues в репозитории.

@@ -5,21 +5,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Copy, 
-  Trash2, 
-  Undo, 
-  Redo, 
-  Search, 
-  Type, 
+import {
+  Copy,
+  Trash2,
+  Undo,
+  Redo,
+  Search,
+  Type,
   Hash,
   Smile,
   Space,
   FileText,
-  Clipboard
+  Clipboard,
+  Save,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SpecialCharsManager } from "./SpecialCharsManager";
+import { historyAPI } from "@/lib/storage";
 
 export const Editor = () => {
   const [text, setText] = useState("");
@@ -60,22 +62,50 @@ export const Editor = () => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(text);
-    toast({ title: "Скопировано", description: "Текст скопирован в буфер обмена" });
+    toast({
+      title: "Скопировано",
+      description: "Текст скопирован в буфер обмена",
+    });
   };
 
   const pasteFromClipboard = async () => {
     try {
       const clipboardText = await navigator.clipboard.readText();
       handleTextChange(text + clipboardText);
-      toast({ title: "Вставлено", description: "Текст вставлен из буфера обмена" });
+      toast({
+        title: "Вставлено",
+        description: "Текст вставлен из буфера обмена",
+      });
     } catch (err) {
-      toast({ title: "Ошибка", description: "Не удалось прочитать буфер обмена" });
+      toast({
+        title: "Ошибка",
+        description: "Не удалось прочитать буфер обмена",
+      });
     }
   };
 
   const clearText = () => {
     handleTextChange("");
     toast({ title: "Очищено", description: "Текст удален" });
+  };
+
+  const saveToHistory = () => {
+    if (!text.trim()) {
+      toast({ title: "Ошибка", description: "Нет текста для сохранения" });
+      return;
+    }
+
+    // Определяем язык текста (простая эвристика)
+    const hasRussianChars = /[а-яё]/i.test(text);
+    const language: "ru" | "en" = hasRussianChars ? "ru" : "en";
+
+    historyAPI.add({
+      text: text,
+      language: language,
+      type: "manual",
+    });
+
+    toast({ title: "Сохранено", description: "Текст добавлен в историю" });
   };
 
   const removeSpecialChars = () => {
@@ -91,45 +121,52 @@ export const Editor = () => {
     toast({ title: "Замена", description: "Текст заменен" });
   };
 
-  const transformCase = (type: 'upper' | 'lower' | 'title') => {
+  const transformCase = (type: "upper" | "lower" | "title") => {
     let newText = text;
     switch (type) {
-      case 'upper':
+      case "upper":
         newText = text.toUpperCase();
         break;
-      case 'lower':
+      case "lower":
         newText = text.toLowerCase();
         break;
-      case 'title':
-        newText = text.replace(/\w\S*/g, (txt) => 
-          txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+      case "title":
+        newText = text.replace(
+          /\w\S*/g,
+          (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
         );
         break;
     }
     handleTextChange(newText);
-    toast({ title: "Форматирование", description: `Регистр изменен на ${type}` });
+    toast({
+      title: "Форматирование",
+      description: `Регистр изменен на ${type}`,
+    });
   };
 
   const cleanSpaces = () => {
-    const newText = text.replace(/\s+/g, ' ').trim();
+    const newText = text.replace(/\s+/g, " ").trim();
     handleTextChange(newText);
     toast({ title: "Очистка", description: "Лишние пробелы удалены" });
   };
 
   const removeEmptyLines = () => {
-    const newText = text.replace(/^\s*[\r\n]/gm, '');
+    const newText = text.replace(/^\s*[\r\n]/gm, "");
     handleTextChange(newText);
     toast({ title: "Очистка", description: "Пустые строки удалены" });
   };
 
   const removeNumbers = () => {
-    const newText = text.replace(/\d/g, '');
+    const newText = text.replace(/\d/g, "");
     handleTextChange(newText);
     toast({ title: "Очистка", description: "Цифры удалены" });
   };
 
   const removeEmojis = () => {
-    const newText = text.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
+    const newText = text.replace(
+      /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu,
+      ""
+    );
     handleTextChange(newText);
     toast({ title: "Очистка", description: "Эмодзи удалены" });
   };
@@ -137,27 +174,27 @@ export const Editor = () => {
   const getStats = () => {
     const chars = text.length;
     const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-    const lines = text.split('\n').length;
+    const lines = text.split("\n").length;
     return { chars, words, lines };
   };
 
   const stats = getStats();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <Card className="bg-gradient-secondary border-border">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center space-x-2 text-lg">
             <FileText className="w-5 h-5 text-primary" />
             <span>Текстовый редактор</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Панель инструментов */}
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              variant="outline" 
-              size="icon" 
+          <div className="flex flex-wrap gap-1 md:gap-2">
+            <Button
+              variant="outline"
+              size="icon"
               onClick={handleUndo}
               disabled={historyIndex <= 0}
               className="transition-smooth"
@@ -165,9 +202,9 @@ export const Editor = () => {
             >
               <Undo className="w-4 h-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               onClick={handleRedo}
               disabled={historyIndex >= history.length - 1}
               className="transition-smooth"
@@ -175,29 +212,37 @@ export const Editor = () => {
             >
               <Redo className="w-4 h-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               onClick={copyToClipboard}
               title="Копировать"
             >
               <Copy className="w-4 h-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               onClick={pasteFromClipboard}
               title="Вставить"
             >
               <Clipboard className="w-4 h-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
+            <Button
+              variant="outline"
+              size="icon"
               onClick={clearText}
               title="Очистить"
             >
               <Trash2 className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={saveToHistory}
+              title="Сохранить в историю"
+            >
+              <Save className="w-4 h-4" />
             </Button>
           </div>
 
@@ -207,21 +252,21 @@ export const Editor = () => {
             value={text}
             onChange={(e) => handleTextChange(e.target.value)}
             placeholder="Введите или вставьте ваш текст здесь..."
-            className="min-h-[300px] bg-background/50 border-border focus:border-primary transition-smooth"
+            className="min-h-[200px] md:min-h-[300px] bg-background/50 border-border focus:border-primary transition-smooth"
           />
 
           {/* Панель специальных символов */}
           <SpecialCharsManager text={text} onTextChange={handleTextChange} />
 
           {/* Статистика */}
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="bg-background/50">
+          <div className="flex flex-wrap gap-1 md:gap-2">
+            <Badge variant="outline" className="bg-background/50 text-xs md:text-sm">
               Символов: {stats.chars}
             </Badge>
-            <Badge variant="outline" className="bg-background/50">
+            <Badge variant="outline" className="bg-background/50 text-xs md:text-sm">
               Слов: {stats.words}
             </Badge>
-            <Badge variant="outline" className="bg-background/50">
+            <Badge variant="outline" className="bg-background/50 text-xs md:text-sm">
               Строк: {stats.lines}
             </Badge>
           </div>
@@ -229,7 +274,7 @@ export const Editor = () => {
       </Card>
 
       {/* Инструменты форматирования */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-lg flex items-center space-x-2">
@@ -258,7 +303,11 @@ export const Editor = () => {
                 className="bg-background/50"
               />
             </div>
-            <Button onClick={findAndReplace} disabled={!searchTerm} className="w-full">
+            <Button
+              onClick={findAndReplace}
+              disabled={!searchTerm}
+              className="w-full"
+            >
               Заменить все
             </Button>
           </CardContent>
@@ -273,26 +322,26 @@ export const Editor = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-3 gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => transformCase('upper')}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => transformCase("upper")}
                 className="text-xs"
               >
                 ВЕРХНИЙ
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => transformCase('lower')}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => transformCase("lower")}
                 className="text-xs"
               >
                 нижний
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => transformCase('title')}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => transformCase("title")}
                 className="text-xs"
               >
                 Заглавный
@@ -315,7 +364,12 @@ export const Editor = () => {
                 Эмодзи
               </Button>
             </div>
-            <Button variant="outline" size="sm" onClick={removeEmptyLines} className="w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={removeEmptyLines}
+              className="w-full"
+            >
               Пустые строки
             </Button>
           </CardContent>
