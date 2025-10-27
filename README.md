@@ -1,150 +1,185 @@
-# LinguaScribe - Персональное приложение для работы с текстом
+# LinguaScribe
 
-## 🎯 Описание
+A comprehensive text editing and note-taking application built with React, TypeScript, and Capacitor.
 
-**LinguaScribe** - это персональное приложение для работы с текстом, оптимизированное для использования на смартфоне. Все данные хранятся локально на вашем устройстве, приложение работает полностью офлайн.
+## 📚 Documentation
 
-## ✨ Основные возможности
+This project includes comprehensive documentation to help you understand and work with the codebase:
 
-### 📝 Текстовый редактор
+- **[API Documentation](API_DOCUMENTATION.md)** - Complete API reference for all components, hooks, and utilities
+- **[UI Components Documentation](UI_COMPONENTS_DOCUMENTATION.md)** - Detailed documentation for all UI components
+- **[Quick Reference Guide](QUICK_REFERENCE.md)** - Fast access to commonly used patterns and APIs
 
-- Полнофункциональное редактирование с историей изменений
-- Инструменты форматирования (регистр, очистка)
-- Поиск и замена текста
-- Статистика (символы, слова, строки)
-- Сохранение в историю
+## 🚀 Features
 
-### 📚 Система заметок
+- **Text Editor**: Rich text editing with formatting tools and search/replace functionality
+- **History Management**: Track and manage text history with filtering and export capabilities
+- **Note Taking**: Create, edit, and organize notes with rich editing features
+- **Suno Lyrics Editor**: Specialized editor for creating Suno-compatible lyrics with tags
+- **Settings Management**: Customize the application with themes, font sizes, and data backup
+- **Mobile Optimized**: Responsive design with mobile-specific optimizations
+- **Local Storage**: All data is stored locally using browser storage APIs
 
-- Создание, редактирование и удаление заметок
-- Поиск по содержимому
-- Экспорт и импорт заметок
-- Автосохранение
+## 🛠️ Tech Stack
 
-### 📖 История
+- **Frontend**: React 18, TypeScript
+- **UI Components**: Radix UI primitives with Tailwind CSS
+- **Mobile**: Capacitor for cross-platform mobile development
+- **State Management**: React hooks and local storage
+- **Form Handling**: React Hook Form with Zod validation
+- **Build Tool**: Vite
 
-- Отслеживание всех изменений текста
-- Фильтрация по языку и типу
-- Экспорт истории
-
-### 🎵 Suno Editor
-
-- Специализированный редактор для создания песен
-- Теги для структуры и стилей
-- Валидация структуры
-
-### ⚙️ Настройки
-
-- Настройка размера шрифта
-- Выбор темы оформления
-- Экспорт/импорт всех данных
-- Управление автосохранением
-
-## 🚀 Установка и запуск
-
-### Требования
-
-- Node.js 18+
-- npm или yarn
-
-### Установка
+## 📦 Installation
 
 ```bash
-# Клонирование репозитория
-git clone <YOUR_REPO_URL>
-cd tex-wiz
-
-# Установка зависимостей
+# Install dependencies
 npm install
 
-# Запуск в режиме разработки
+# Start development server
 npm run dev
 
-# Сборка для продакшена
+# Build for production
 npm run build
+
+# Preview production build
+npm run preview
 ```
 
-## 📱 Мобильная оптимизация
-
-Приложение оптимизировано для использования на смартфонах:
-
-- Адаптивный дизайн
-- Увеличенные размеры кнопок для сенсорного управления
-- Оптимизированные отступы и размеры шрифтов
-- Поддержка ориентации экрана
-
-## 💾 Локальное хранение данных
-
-Все данные хранятся в localStorage браузера:
-
-- Заметки
-- История изменений
-- Настройки приложения
-- Песни Suno
-
-### Экспорт данных
-
-- Экспорт всех данных в JSON файл
-- Резервное копирование заметок
-- Перенос данных между устройствами
-
-### Импорт данных
-
-- Импорт из JSON файлов
-- Восстановление из резервных копий
-- Синхронизация между устройствами
-
-## 🛠 Технологии
-
-- **Frontend**: React 18 + TypeScript
-- **Сборка**: Vite
-- **Стили**: Tailwind CSS + shadcn/ui
-- **Хранение**: localStorage
-- **Мобильная разработка**: Capacitor
-
-## 📋 Структура проекта
+## 🏗️ Project Structure
 
 ```
 src/
-├── components/          # React компоненты
-│   ├── Editor.tsx      # Текстовый редактор
-│   ├── Notes.tsx       # Система заметок
-│   ├── History.tsx     # История изменений
-│   ├── SunoEditor.tsx  # Редактор песен
-│   ├── Settings.tsx    # Настройки
-│   └── ui/             # UI компоненты
-├── lib/
-│   ├── storage.ts      # API для локального хранения
-│   └── utils.ts        # Утилиты
-├── hooks/
-│   └── use-mobile-optimization.ts # Мобильная оптимизация
-└── pages/
-    └── Index.tsx       # Главная страница
+├── components/          # React components
+│   ├── ui/             # Reusable UI components
+│   ├── Editor.tsx      # Text editor component
+│   ├── History.tsx     # History management
+│   ├── Notes.tsx       # Note-taking component
+│   ├── SunoEditor.tsx  # Suno lyrics editor
+│   ├── Settings.tsx    # Settings management
+│   └── Navigation.tsx  # Navigation component
+├── hooks/              # Custom React hooks
+│   ├── use-toast.ts    # Toast notification hook
+│   └── use-mobile-optimization.ts  # Mobile optimization hook
+├── lib/                # Utility libraries
+│   ├── storage.ts      # Local storage API
+│   └── utils.ts        # Utility functions
+├── pages/              # Page components
+└── App.tsx             # Main application component
 ```
 
-## 🔧 Настройка для личного использования
+## 🎯 Core Components
 
-1. **Удалите ненужные зависимости** (уже сделано)
-2. **Настройте Capacitor для мобильной сборки**:
+### Navigation
+Tab-based navigation between different sections of the application.
 
-   ```bash
-   npm install @capacitor/cli @capacitor/core
-   npx cap init
-   npx cap add android
-   npx cap sync
-   ```
+### Editor
+Comprehensive text editor with:
+- Undo/redo functionality
+- Text formatting tools
+- Search and replace
+- Statistics tracking
+- Special character management
 
-3. **Соберите для Android**:
-   ```bash
-   npm run build
-   npx cap copy android
-   npx cap open android
-   ```
+### History
+Manage text history with:
+- Filtering by language and type
+- Export functionality
+- Individual record management
 
-## 📝 Лицензия
+### Notes
+Note-taking with:
+- Rich editing capabilities
+- Import/export functionality
+- Search and organization
+- Voice input support
 
-Этот проект предназначен для личного использования.
+### SunoEditor
+Specialized lyrics editor with:
+- Predefined Suno tags
+- Structure validation
+- Preview mode
+- Export capabilities
 
-## 🤝 Поддержка
+### Settings
+Application configuration with:
+- Theme control (light/dark/auto)
+- Font size adjustment
+- Data backup and restore
+- Mobile optimization settings
 
-Для вопросов и предложений создавайте issues в репозитории.
+## 🔧 Development
+
+### Adding New Components
+
+1. Create the component in the appropriate directory
+2. Add TypeScript interfaces for props
+3. Include proper accessibility features
+4. Add to the documentation
+5. Test on mobile and desktop
+
+### Styling Guidelines
+
+- Use Tailwind CSS for styling
+- Follow the established design system
+- Ensure responsive design
+- Maintain accessibility standards
+
+### State Management
+
+- Use React hooks for local state
+- Use the storage API for persistence
+- Implement proper error handling
+- Use toast notifications for user feedback
+
+## 📱 Mobile Development
+
+The application is optimized for mobile devices with:
+
+- Responsive design patterns
+- Touch-friendly interfaces
+- Mobile-specific optimizations
+- Capacitor integration for native features
+
+## 🧪 Testing
+
+```bash
+# Run linting
+npm run lint
+
+# Run tests (when implemented)
+npm test
+```
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Update documentation
+6. Submit a pull request
+
+## 📖 Additional Resources
+
+- [React Documentation](https://react.dev/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Radix UI Documentation](https://www.radix-ui.com/)
+- [Capacitor Documentation](https://capacitorjs.com/docs)
+
+## 🆘 Support
+
+If you encounter any issues or have questions:
+
+1. Check the documentation files
+2. Review the quick reference guide
+3. Search existing issues
+4. Create a new issue with detailed information
+
+---
+
+**LinguaScribe** - Empowering text creation and management across all devices.
